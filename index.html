@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TV Плеер</title>
+<link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+
+<!-- Экран выбора источника -->
+<section id="screen-start" class="screen">
+  <div class="start">
+    <h1 class="logo">TV&nbsp;Плеер</h1>
+    <p class="lead">Ваши видео — на большом экране. Управление пультом: стрелки, OK, «Назад».</p>
+
+    <div class="start-row">
+      <button class="focusable btn btn-big" id="btn-pick-folder" type="button">
+        <svg class="ico" viewBox="0 0 24 24"><path d="M3 6a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+        Открыть папку
+      </button>
+      <button class="focusable btn btn-big" id="btn-pick-files" type="button">
+        <svg class="ico" viewBox="0 0 24 24"><path d="M4 4h16v16H4zM8 8v8l7-4z"/></svg>
+        Выбрать файлы
+      </button>
+    </div>
+
+    <h2 class="start-sub">Сервер в локальной сети</h2>
+    <div class="start-row">
+      <input class="focusable input" id="server-url" type="url" inputmode="url"
+             placeholder="http://192.168.1.10:8080" autocomplete="off" spellcheck="false">
+      <button class="focusable btn" id="btn-connect" type="button">Подключиться</button>
+    </div>
+    <p class="hint" id="start-msg"></p>
+
+    <input type="file" id="input-folder" class="hidden-input" webkitdirectory directory multiple>
+    <input type="file" id="input-files" class="hidden-input" multiple
+           accept="video/*,.mkv,.avi,.ts,.m2ts,.srt,.vtt">
+  </div>
+</section>
+
+<!-- Экран библиотеки -->
+<section id="screen-library" class="screen hidden">
+  <header class="lib-header">
+    <div class="search-wrap">
+      <svg class="ico search-ico" viewBox="0 0 24 24"><path d="M10 3a7 7 0 0 1 5.6 11.2l5 5-1.4 1.4-5-5A7 7 0 1 1 10 3zm0 2a5 5 0 1 0 0 10 5 5 0 0 0 0-10z"/></svg>
+      <input class="focusable input search" id="search" type="search" placeholder="Поиск" autocomplete="off" spellcheck="false">
+    </div>
+    <div class="lib-info"><span id="lib-source"></span><span id="lib-count"></span></div>
+    <button class="focusable btn" id="btn-refresh" type="button">Обновить</button>
+    <button class="focusable btn" id="btn-change-source" type="button">Источник</button>
+  </header>
+  <div class="grid-scroll" data-scroll>
+    <div class="grid" id="grid" data-nav-group="grid"></div>
+    <p class="empty hidden" id="lib-empty"></p>
+  </div>
+</section>
+
+<!-- Экран плеера -->
+<section id="screen-player" class="screen hidden">
+  <video id="video" preload="auto" playsinline></video>
+  <div class="big-icon hidden" id="p-big"></div>
+  <div class="osd" id="osd">
+    <div class="osd-top">
+      <h2 class="p-title" id="p-title"></h2>
+    </div>
+    <div class="osd-bottom">
+      <div class="seek focusable" id="p-seek" tabindex="0" role="slider" aria-label="Перемотка">
+        <div class="seek-buffer" id="p-buffer"></div>
+        <div class="seek-fill" id="p-fill"></div>
+      </div>
+      <div class="times"><span id="p-cur">0:00</span><span id="p-dur">0:00</span></div>
+      <div class="controls">
+        <button class="focusable btn btn-icon" data-act="back" type="button" title="Назад к библиотеке">
+          <svg class="ico" viewBox="0 0 24 24"><path d="M20 11H7.8l5.6-5.6L12 4l-8 8 8 8 1.4-1.4L7.8 13H20z"/></svg>
+        </button>
+        <button class="focusable btn" data-act="restart" type="button">
+          <svg class="ico" viewBox="0 0 24 24"><path d="M6 6h2v12H6zm3.5 6L18 18V6z"/></svg>С начала
+        </button>
+        <span class="spacer"></span>
+        <button class="focusable btn" data-act="rew" type="button">−10 с</button>
+        <button class="focusable btn btn-play" data-act="play" id="p-play" type="button">
+          <svg class="ico ico-play" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+          <svg class="ico ico-pause" viewBox="0 0 24 24"><path d="M6 5h4v14H6zm8 0h4v14h-4z"/></svg>
+        </button>
+        <button class="focusable btn" data-act="fwd" type="button">+10 с</button>
+        <span class="spacer"></span>
+        <button class="focusable btn btn-icon" data-act="voldown" type="button" title="Тише">
+          <svg class="ico" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9zm13 2h6v2h-6z"/></svg>
+        </button>
+        <span class="vol" id="p-vol">100%</span>
+        <button class="focusable btn btn-icon" data-act="volup" type="button" title="Громче">
+          <svg class="ico" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9zm15 2V8h-2v3h-3v2h3v3h2v-3h3v-2z"/></svg>
+        </button>
+        <button class="focusable btn" data-act="subs" id="p-subs" type="button">Субтитры: нет</button>
+        <button class="focusable btn btn-icon" data-act="fs" type="button" title="Во весь экран">
+          <svg class="ico" viewBox="0 0 24 24"><path d="M4 4h6v2H6v4H4zm10 0h6v6h-2V6h-4zM4 14h2v4h4v2H4zm14 0h2v6h-6v-2h4z"/></svg>
+        </button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="toast hidden" id="toast"></div>
+
+<!-- Обычные скрипты (не ES-модули): так страница работает и с file:// -->
+<script src="js/util.js"></script>
+<script src="js/storage.js"></script>
+<script src="js/nav.js"></script>
+<script src="js/subtitles.js"></script>
+<script src="js/sources.js"></script>
+<script src="js/thumbs.js"></script>
+<script src="js/library.js"></script>
+<script src="js/player.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
